@@ -50,7 +50,7 @@ const byte Power3 = 13;     // "Power3" connected to pin D13
 bool SwitchTrack;
 
 //Begin cycle-friendly functions, SEE BOTTOM FOR FUNCTION DESCRIPTIONS
-void TrackButton (LBut *ofInt, byte NumberOfStates) {            
+void TrackButton (LBut *ofInt, byte NumberOfStates) {
   ofInt->NumberOfStates = NumberOfStates;
   if (digitalRead(ofInt->ButPin) == LOW) {
     if (ofInt->ButtonPress == LOW && ofInt->Debounce == LOW) {
@@ -111,7 +111,7 @@ void CycleAdvanceState (LBut *ofInt, unsigned int AdvanceCycles) {
 }
 
 
-void ReportStateChange (LBut *ofInt, byte MessageToSend) {
+void ReportStateChange (LBut *ofInt, unsigned int MessageToSend) {
   if (ofInt->StateChange == HIGH) {
     ofInt->StateChange = LOW;
     Serial.println(MessageToSend);
@@ -277,61 +277,70 @@ void setup() {
 }
 
 void loop() {
-// MASTER STATE LOGIC GOES HERE //
+  TrackButton(&LBut1, 2);
 
+  switch (LBut1.State) {
+    case 0:
+      Blink(&LBut1, 100);
+      ReportStateChange(&LBut1, 258);
+      break;
+    case 1:
+      FadeDes(&LBut1, 100);
+      break;
+  }
 }
 
 
 /*------- CYCLE FRIENDLY FUNCTION LIST --------//
 
   void TrackButton (&LBut, byte NumberOfStates)
-      This function will track a button's state from 0,1 ... NumberOfStates and allow you to select 
-      other functions condtionally by the state of the button. Recommended to use switch...case 
+      This function will track a button's state from 0,1 ... NumberOfStates and allow you to select
+      other functions condtionally by the state of the button. Recommended using switch...case
       statements to define button states. Use LBut.State as defining variable.
-                                  
+
   void FreezeState (&LBut, unsigned int FreezeCycles)
-      This function freezes the state and will indicate with a fast blink. As a result, it 
+      This function freezes the state and will indicate with a fast blink. As a result, it
       skips other LED and state advance functions while active.
-      
+
   void CycleAdvanceState (&LBut, unsigned int AdvanceCycles)
       This function advances the button state after a number of cycles. Skipped by freezing.
-      
+
   void ReportStateChange (&LBut, byte MessageToSend)
       This function will see a change in state and send a serial message.
-      
+
   void LEDOn (&LBut)
       This function turns the LED on. Must not use with other lighting routines in the same state.
-      
+
   void LEDOff (&LBut)
       This function turns the LED on.
-      
+
   void Blink (&LBut, byte BlinkSpeed)
       This function blinks the LED.
-      
+
   void FadeInOut (&LBut, byte FadeSpeed)
       This function fades the LED in and out.
-      
+
   void FadeAsc (&LBut, byte FadeSpeed)
       This function does an ascending fade on the LED then starts over.
-      
+
   void FadeDes (&LBut, byte FadeSpeed)
       This function does an descending fade on the LED then starts over.
-      
+
   void SwitchOn (byte PowerControl)
       This function turns on a power control once per state.
-      
+
   void SwitchOff (byte PowerControl)
       This function turns off a power control once per state.
-      
+
   void SerialOnPIR (&PIR, byte MessageToSend)
       This function sends a serial message when a PIR event is detected.
-      
+
   void AdvanceOnPIR (&LBut, &PIR)
       This function advances the button state when a PIR event is detected.
-      
+
   void CycledPowerOffPIR (byte PowerControl, &PIR, unsigned int PowerOnCycles)
       This function turns off a power control for a designated number of cycles when a PIR event is detected.
-      
+
   void CycledPowerOnPIR (byte PowerControl, &PIR, unsigned int PowerOnCycles)
       This function turns on a power control for a designated number of cycles when a PIR event is detected.
 */
